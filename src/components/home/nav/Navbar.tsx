@@ -12,40 +12,56 @@ import {
 import DropDown1 from "./DropDown1";
 import { Link } from "react-router-dom";
 import MobileNav from "./MobileNav";
+import CryptoJS from "crypto-js";
+import { T } from "./DropDown1";
 // import StoreLogo from "../../other/StoreLogo";
 
-type T = {
-  to: String;
-  text: String;
-};
+// type T = {
+//   to: String;
+//   text: String;
+//   disabled: boolean;
+// };
 
 const Navbar = () => {
-  useEffect(() => {
+  const getUser = () => {
     const user = localStorage.getItem("user");
+    console.log(user);
     if (user) {
-      const parsedUser: any = JSON.parse(user);
-      setUser(parsedUser);
-      console.log(parsedUser);
+      const bytes = CryptoJS.AES.decrypt(
+        user,
+        process.env.REACT_APP_ENCRYPT_KEY
+      );
+      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      if (decryptedData) {
+        setUser(decryptedData);
+        console.log(decryptedData);
+      }
     }
+  };
+  useEffect(() => {
+    getUser();
   }, []);
+
+  const [user, setUser] = useState<any>(null);
 
   const cartQuantity = useAppSelector(
     (state) => state.cartReducer.totalQuantity
   );
   const helpItems: Array<T> = [
-    { text: "FAQS", to: "/help/faqs" },
-    { text: "Contact Us", to: "/help/contact-us" },
+    { text: "FAQS", to: "/help/faqs", disabled: false },
+    { text: "Contact Us", to: "/help/contact-us", disabled: false },
   ];
   const userProfile: Array<T> = [
-    { text: "Profile", to: "/account/profile" },
-    { text: "Orders", to: "/account/orders" },
-    { text: "Wishlist", to: "/account/wishlist" },
-    { text: "Logout", to: "/account/logout" },
+    { text: `${user?.data.username.split(" ")[0]}`, to: "", disabled: true },
+    { text: "Profile", to: "/account/profile", disabled: false },
+    { text: "Profile", to: "/account/profile", disabled: false },
+    { text: "Orders", to: "/account/orders", disabled: false },
+    { text: "Wishlist", to: "/account/wishlist", disabled: false },
+    { text: "Logout", to: "/account/logout/true", disabled: false },
   ];
   const [isDropDownShowing, setIsDropDownShowing] = useState(false);
   const [isProfileDropDownShowing, setIsProfileDropDownShowing] =
     useState(false);
-  const [user, setUser] = useState(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   function toggleDropDown(value: boolean) {
     setIsDropDownShowing(value);
@@ -125,7 +141,10 @@ const Navbar = () => {
               <BiQuestionMark className="text-sm" />
             </div>
             Help
-            <div style={{ left: "29%" }} className="w-4/5 absolute top-10 z-10">
+            <div
+              style={{ left: "29%" }}
+              className="w-4/5 absolute bg-white top-10 z-10"
+            >
               <DropDown1
                 toggleDropDown={toggleDropDown}
                 isDropDownShowing={isDropDownShowing}
@@ -139,7 +158,7 @@ const Navbar = () => {
             <Link to="/account/login">Login/SignUp</Link>
           ) : (
             <Link
-              to="account/profile"
+              to=""
               className="flex-wrap items-center flex hover:bg-white hover:text-pink-600 px-2 py-1"
               onMouseEnter={() =>
                 toggleProfileDropDown(!isProfileDropDownShowing)

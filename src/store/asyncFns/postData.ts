@@ -5,18 +5,18 @@ import { post, get } from "../../client/client";
 // import { useAppSelector } from "../hooks/hooks";
 import { history } from "../../utilities/routerFns";
 import { setStatus, setUser } from "../slices/authSlice";
+import { setProducts } from "../slices/productSlice";
 
 export const login = async (dispatch: any, getState: any) => {
   // Make an async HTTP request
   const currentState = getState();
   await post("login", currentState.authReducer.form)
     .then(async (res) => {
-      // console.log(res);
-      await dispatch(setStatus(true));
-      history.navigate("/");
-      // Dispatch an action with the todos we received
-      await dispatch(setUser(res.data));
-      // Check the updated store state after dispatching
+      if (res.status === 200 || res.status === 201) {
+        await dispatch(setStatus(true));
+        history.navigate("/");
+        await dispatch(setUser(res.data));
+      }
     })
     .catch((err) => console.log(err));
 };
@@ -67,12 +67,9 @@ export const logout = async (dispatch: any, getState: any) => {
   await post("logout", currentState.authReducer.form)
     .then((res) => {
       console.log(res);
-      const responseData = res;
+      localStorage.removeItem("user");
+      history.navigate(`/`);
       // Dispatch an action with the todos we received
-      dispatch({ type: "user", payload: responseData });
-      // Check the updated store state after dispatching
-      // const allTodos = getState().todos;
-      // console.log("Number of todos after loading: ", allTodos.length);
     })
     .catch((err) => console.log(err));
 };
@@ -93,10 +90,13 @@ export const addToCart = async (dispatch: any, getState: any) => {
 };
 export const getProducts = async (dispatch: any, getState: any) => {
   // Make an async HTTP request
+  // const productState = getState().productReducer;
+  // console.log(productState);
   await get("get-products")
     .then((res) => {
       console.log(res);
       const responseData = res;
+      dispatch(setProducts(res.product));
       // Dispatch an action with the todos we received
       dispatch({ type: "user", payload: responseData });
       // Check the updated store state after dispatching

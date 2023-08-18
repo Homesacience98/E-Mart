@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 // import { Path } from "react-router-dom";
 import { To } from "react-router-dom";
 
-type T = {
+export type T = {
   to: String;
   text: String;
+  disabled: boolean;
 };
 interface items {
   itemArr: Array<T>;
@@ -18,15 +19,21 @@ interface items {
 const DropDown1: FC<items> = (props): JSX.Element => {
   return props.isDropDownShowing ? (
     <div className="bg-white w-full text-black">
-      <ul>
+      <ul className="w-full">
         {props.itemArr.map((item, index) => (
           <li
             key={index}
             className="py-2 pl-3 z-10
              text-sm
-            hover:text-pink-600 hover:bg-gray-100"
+            hover:text-pink-600 w-full hover:bg-gray-100"
           >
-            <Link to={item.to as To}>{item.text}</Link>
+            {item.disabled ? (
+              <h1 className="font-semibold"> Hi {item.text}</h1>
+            ) : (
+              <Link className="w-full block" to={item.to as To}>
+                {item.text}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
